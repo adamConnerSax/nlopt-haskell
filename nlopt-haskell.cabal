@@ -26,8 +26,15 @@ flag link-nlopt-cxx
      default: False
      manual: True
 
+flag nnls
+     description: Link with @-lnlopt2@ instead of @-lnlopt@
+     default: False
+     manual: True
+
+
 library
   exposed-modules: Numeric.Optimization.NLOPT.Bindings
+                 , Numeric.Optimization.NLOPT.NNLS
   build-depends:       base >=4.9 && <5
                      , vector >= 0.10
   hs-source-dirs:      src
@@ -35,14 +42,17 @@ library
   if flag(link-nlopt-cxx)
     extra-libraries:     nlopt_cxx
   else
-    extra-libraries:     nlopt
-
+    if flag(nnls)
+      extra-libraries:     nlopt2
+    else
+      extra-libraries:     nlopt
 
 test-suite example
   type: exitcode-stdio-1.0
   main-is: example.hs
   hs-source-dirs: tests
   default-language:    Haskell2010
+  extra-lib-dirs: /usr/local/lib
   build-depends: base >= 4.9 && < 5
                , nlopt-haskell
                , vector >= 0.10

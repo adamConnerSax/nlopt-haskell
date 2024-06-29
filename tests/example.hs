@@ -4,6 +4,7 @@
 module Main where
 
 import Numeric.Optimization.NLOPT.Bindings
+import Numeric.Optimization.NLOPT.NNLS
 import qualified Data.Vector.Storable as V
 import qualified System.Exit as E
 import Control.Monad (when)
@@ -43,8 +44,18 @@ expectedParams = V.fromList [0.33333337491594595,0.2962962707981303]
 expectedMinimum :: Double
 expectedMinimum = 0.5443310305302559
 
+nnlsTest :: IO ()
+nnlsTest = do
+  putStrLn "NNLS"
+  let a = V.fromList [1, 0, 1, 1, 1, 0, 0, 1, 1]
+      b = V.fromList [1, 2, -1]
+  (x, mode) <- nnls 3 3 a b
+  putStrLn $ "mode=" <> show mode
+  putStrLn $ "x=" <> show x
+
 main :: IO ()
 main = do
+  nnlsTest
   Just opt <- create LD_MMA 2
   putStrLn "Got optimizer."
   bnd <- set_lower_bounds opt lowerBounds

@@ -770,7 +770,7 @@ foreign import ccall "nlopt.h nlopt_add_precond_inequality_constraint"
 
 foreign import ccall "nlopt.h nlopt_add_inequality_mconstraint"
   nlopt_add_inequality_mconstraint :: NloptOpt -> CUInt -> FunPtr (CMFunc a)
-                                  -> StablePtr a -> CDouble -> IO CInt
+                                  -> StablePtr a -> Ptr CDouble -> IO CInt
 
 remove_inequality_constraints :: Opt -> IO Result
 remove_inequality_constraints =
@@ -801,12 +801,14 @@ add_precond_inequality_constraint opt objfun precfun userdata tol = do
 add_inequality_mconstraint :: Opt -> Word -> VectorFunction a -> a
                            -> Double -> IO Result
 add_inequality_mconstraint opt constraintsize constrfun userdata tol = do
+  let tolV = V.replicate (fromIntegral constraintsize) (realToFrac tol)
   constrfunptr <- exportFunPtr mkMFunction wrapMFunction constrfun opt
   userptr <- getStablePtr opt userdata
   withOpt opt $ \o ->
-      parseEnum <$>
-      nlopt_add_inequality_mconstraint o (fromIntegral constraintsize)
-      constrfunptr userptr (realToFrac tol)
+    V.unsafeWith tolV $ \tv ->
+    parseEnum <$>
+    nlopt_add_inequality_mconstraint o (fromIntegral constraintsize)
+    constrfunptr userptr tv
 
 foreign import ccall "nlopt.h nlopt_remove_equality_constraints"
   nlopt_remove_equality_constraints :: NloptOpt -> IO CInt

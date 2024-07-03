@@ -49,13 +49,26 @@ nnlsTest = do
   putStrLn "NNLS"
   let a = V.fromList [1, 0, 1, 1, 1, 0, 0, 1, 1]
       b = V.fromList [1, 2, -1]
-  (x, mode) <- nnls 3 3 a b
+  (x, rNorm, mode) <- nnls 3 3 a b
   putStrLn $ "mode=" <> show mode
   putStrLn $ "x=" <> show x
+  putStrLn $ "||Ax - b||_2 = " <> show rNorm
+
+
+ldpTest :: IO ()
+ldpTest = do
+  putStrLn "LDP"
+  let g = V.fromList [1, 0, 1, 1, 1, 0, 0, 1, 1]
+      h = V.fromList [1, 1, 1]
+  (x, xnorm, mode) <- ldp 3 3 g h
+  putStrLn $ "mode=" <> show mode
+  putStrLn $ "x=" <> show x
+  putStrLn $ "||x||_2 = " <>  show xnorm
 
 main :: IO ()
 main = do
   nnlsTest
+  ldpTest
   Just opt <- create LD_MMA 2
   putStrLn "Got optimizer."
   bnd <- set_lower_bounds opt lowerBounds
